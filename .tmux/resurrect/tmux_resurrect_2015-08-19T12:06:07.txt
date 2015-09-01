@@ -1,0 +1,10 @@
+pane	0	1	:ruby	0	:#	1	:/Users/pyg/Development/everlane.com	1	ruby	:redis-server 127.0.0.1:6379 
+foreman: master    
+pane	0	2	:Dev	1	:*	1	:/Users/pyg/Development/everlane.com	1	vim	:vim
+pane	0	2	:Dev	1	:*	2	:/Users/pyg/Development/everlane.com	0	ruby	:/Users/pyg/.rbenv/versions/2.2.1/bin/ruby /Users/pyg/.rbenv/versions/2.2.1/bin/rake watchr
+pane	0	2	:Dev	1	:*	3	:/Users/pyg/Development/everlane.com	0	ruby	:ruby /Users/pyg/.rbenv/versions/2.2.1/bin/spring rails c
+pane	0	3	:Bash	0	:-	1	:/Users/pyg/Development/everlane.com	1	ruby	:ruby /Users/pyg/.rbenv/versions/2.2.1/bin/spring rspec ./spec/controllers/admin/orders_controller_spec.rb
+window	0	1	0	:#	bc9e,204x63,0,0,1
+window	0	2	1	:*	0909,204x63,0,0{122x63,0,0,2,81x63,123,0[81x31,123,0,3,81x31,123,32,4]}
+window	0	3	0	:-	bca2,204x63,0,0,5
+state	0	0

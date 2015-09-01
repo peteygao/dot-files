@@ -1,0 +1,9 @@
+pane	0	1	:App	1	:*	1	:/Users/pyg/Development/everlane.com	1	bash	:redis-server 127.0.0.1:6379 
+pane	0	2	:Dev	0	:-	1	:/Users/pyg/Development/everlane.com	1	vim	:vim
+pane	0	2	:Dev	0	:-	2	:/Users/pyg/Development/everlane.com	0	ruby	:/Users/pyg/.rbenv/versions/2.2.1/bin/ruby /Users/pyg/.rbenv/versions/2.2.1/bin/rake watchr
+pane	0	2	:Dev	0	:-	3	:/Users/pyg/Development/everlane.com	0	ruby	:ruby /Users/pyg/.rbenv/versions/2.2.1/bin/spring rails c
+pane	0	3	:Bash	0	: 	1	:/Users/pyg	1	bash	:
+window	0	1	1	:*	884d,364x101,0,0,0
+window	0	2	0	:-	2daf,364x101,0,0{202x101,0,0,5,161x101,203,0[161x50,203,0,9,161x50,203,51,3]}
+window	0	3	0	: 	8851,364x101,0,0,4
+state	0	0

@@ -1,0 +1,9 @@
+pane	0	1	:App	0	:#	1	:/Users/pyg/Development/everlane.com	1	ruby	:foreman: master    
+pane	0	2	:Dev	0	:-	1	:/Users/pyg/Development/everlane.com	1	vim	:vim
+pane	0	2	:Dev	0	:-	2	:/Users/pyg/Development/everlane.com	0	ruby	:/Users/pyg/.rbenv/versions/2.2.1/bin/ruby /Users/pyg/.rbenv/versions/2.2.1/bin/rake watchr
+pane	0	2	:Dev	0	:-	3	:/Users/pyg/Development/everlane.com	0	ruby	:ruby /Users/pyg/.rbenv/versions/2.2.1/bin/spring rails c
+pane	0	3	:Bash	1	:*	1	:/Users/pyg/Development/everlane.com	1	vim	:vim /Users/pyg/.tmux.conf
+window	0	1	0	:#	884d,364x101,0,0,0
+window	0	2	0	:-	4a19,364x101,0,0{237x101,0,0,2,126x101,238,0[126x50,238,0,12,126x50,238,51,13]}
+window	0	3	1	:*	445b,364x101,0,0,14
+state	0	0

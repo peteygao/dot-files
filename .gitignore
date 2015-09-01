@@ -1,0 +1,16 @@
+*.swi
+*.swl
+*.swm
+*.swn
+*.swo
+*.swp
+*.swk
+*.swj
+*.tmp
+*.cache
+*.rdb
+*~
+.project
+.DS_Store
+tmp/
+log/
