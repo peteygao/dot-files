@@ -1,3 +1,5 @@
+set t_Co=16
+
 let mapleader=" "
 
 set showmode                    " always show what mode we're currently editing in
@@ -28,14 +30,17 @@ set laststatus=2
 " Gundo
 nnoremap U :GundoToggle<CR>
 
-" CtrlP
-"set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/\.git/*
-"let g:ctrlp_cache_dir = $HOME . '/.cache/ctrlp'
+" CtrlP + CtrlP-Cmatcher
 if executable('ag')
+  let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
   let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+  noremap <S-T> :CtrlPClearCache<CR>:CtrlPRoot<CR>
+else
+  let g:ctrlp_lazy_update = 75
+  set wildignore+=*/tmp/*,*/img/*,*/images/*,*/imgs/*,*.so,*.swp,*.zip,*/\.git/*,*/log/*
+  let g:ctrlp_cache_dir = $HOME . '/.cache/ctrlp'
+  noremap <S-T> :CtrlPRoot<CR>
 endif
-
-noremap <S-T> :CtrlPClearCache<CR>:CtrlPRoot<CR>
 
 " Only for Colemak keyboards, remap hjkl
 "noremap k j
