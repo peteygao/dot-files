@@ -26,6 +26,19 @@ nmap gH <Plug>GitGutterPrevHunk
 " Vim-Airline
 "let g:airline#extensions#tabline#enabled = 1
 set laststatus=2
+let g:airline_mode_map = {
+    \ '__' : '-',
+    \ 'n'  : 'N',
+    \ 'i'  : 'I',
+    \ 'R'  : 'R',
+    \ 'c'  : 'C',
+    \ 'v'  : 'V',
+    \ 'V'  : 'V',
+    \ '' : 'V',
+    \ 's'  : 'S',
+    \ 'S'  : 'S',
+    \ '' : 'S',
+    \ }
 
 " Gundo
 nnoremap U :GundoToggle<CR>
@@ -34,12 +47,12 @@ nnoremap U :GundoToggle<CR>
 if executable('ag')
   let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
   let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
-  noremap <S-T> :CtrlPClearCache<CR>:CtrlPRoot<CR>
+  noremap <leader>f :CtrlPClearCache<CR>:CtrlPRoot<CR>
 else
   let g:ctrlp_lazy_update = 75
   set wildignore+=*/tmp/*,*/img/*,*/images/*,*/imgs/*,*.so,*.swp,*.zip,*/\.git/*,*/log/*
   let g:ctrlp_cache_dir = $HOME . '/.cache/ctrlp'
-  noremap <S-T> :CtrlPRoot<CR>
+  noremap <leader>f :CtrlPRoot<CR>
 endif
 
 " Only for Colemak keyboards, remap hjkl
@@ -54,10 +67,15 @@ endif
 "noremap <C-W>H <C-W>K
 
 " opens search results in a window w/ links and highlight the matches
-command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=tags --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* . -e <args>' | copen 33 | redraw! | execute 'silent /<args>'
-" shift-control-* Greps for the word under the cursor
-nmap <C-G> :Grep <c-r>=expand("<cword>")<cr><cr>
-
+if executable('ag')
+  command! -nargs=+ AG execute 'silent Ag! <args>' | copen 33 | redraw! | execute 'silent /<args>'
+  " leader + D searches for the word under the cursor
+  nmap <leader>d :AG <c-r>=expand("<cword>")<cr><cr>
+else
+  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=tags --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* . -e <args>' | copen 33 | redraw! | execute 'silent /<args>'
+  " leader + D searches for the word under the cursor
+  nmap <leader>d :Grep <c-r>=expand("<cword>")<cr><cr>
+endif
 
 " Test helpers from Gary Bernhardt's screen cast:
 " https://www.destroyallsoftware.com/screencasts/catalog/file-navigation-in-vim
