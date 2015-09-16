@@ -42,6 +42,8 @@ let g:airline_mode_map = {
 
 " Gundo
 nnoremap U :GundoToggle<CR>
+set undofile
+set undodir=~/.vim/undo
 
 " CtrlP + CtrlP-Cmatcher
 if executable('ag')
