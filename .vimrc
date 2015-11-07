@@ -9,8 +9,7 @@ set softtabstop=2               " when hitting <BS>, pretend like a tab is remov
 set shiftwidth=2                " number of spaces to use for autoindenting
 set bs=2
 set paste
-"set autoindent
-"set copyindent
+set autoindent
 set ignorecase
 set smartcase
 execute pathogen#infect()
@@ -46,6 +45,8 @@ set undofile
 set undodir=~/.vim/undo
 
 " CtrlP + CtrlP-Cmatcher
+" Use the maintained version of CtrlP:
+" https://github.com/ctrlpvim/ctrlp.vim
 if executable('ag')
   let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
   let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
