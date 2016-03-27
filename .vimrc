@@ -26,9 +26,9 @@ highlight SpecialKey guifg=#4a4a59
 
 " 100 characters line width highlight
 hi LineOverflow  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
-autocmd BufEnter,VimEnter,FileType *.rb,*.coffee let w:m2=matchadd('LineOverflow', '\%>100v.\+', -1)
-autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee autocmd WinEnter *.rb,*.coffee let w:created=1
-autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee let w:created=1
+autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js let w:m2=matchadd('LineOverflow', '\%>100v.\+', -1)
+autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js autocmd WinEnter *.rb,*.coffee let w:created=1
+autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js let w:created=1
 
 " gp remaps to "select recently changed text" (e.g. from paste)
 nnoremap gp `[v`]
@@ -59,8 +59,9 @@ let g:check_interval = 500
 let g:do_new_buffer_size = 10
 let g:do_refresh_key = "<F37>"
 
-" Gundo
-nnoremap U :GundoToggle<CR>
+" Mundo, an active fork of Gundo:
+" https://github.com/simnalamburt/vim-mundo
+nnoremap U :MundoToggle<CR>
 set undofile
 set undodir=~/.vim/undo
 
@@ -104,7 +105,7 @@ inoremap <s-tab> <c-n>
 "noremap <C-W>H <C-W>K
 
 " opens search results in a window w/ links and highlight the matches
-if executable('ag')
+if exists(':Ag')
   command! -nargs=+ Grep execute 'silent Ag! "<args>"' | copen 15 | redraw! | execute 'silent /<args>'
 else
   command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=tags --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* . -e "<args>"' | copen 15 | redraw! | execute 'silent /"<args>"'
