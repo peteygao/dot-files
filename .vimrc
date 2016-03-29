@@ -2,21 +2,36 @@ set t_Co=16
 
 let mapleader=" "
 
+set undofile
+set undodir=~/.vim/undo
 set showmode                    " always show what mode we're currently editing in
-set expandtab                   " expand tabs by default (overloadable per file type later)
+set expandtab                   " expand tabs by default (overloadable per file type later) (WARNING: this gets reset when :set paste is true!)
 set tabstop=2                   " a tab is four spaces
 set softtabstop=2               " when hitting <BS>, pretend like a tab is removed, even if spaces
 set shiftwidth=2                " number of spaces to use for autoindenting
 set bs=2
-set paste
 set autoindent
 set ignorecase
 set smartcase
+set clipboard=unnamed           " copy the default buffer to clipboard
 execute pathogen#infect()
 syntax on
 filetype plugin indent on
 set hlsearch
 set incsearch
+set list
+set listchars=tab:▸·
+highlight NonText guifg=#4a4a59
+highlight SpecialKey guifg=#4a4a59
+
+" 100 characters line width highlight
+hi LineOverflow  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
+autocmd BufEnter,VimEnter,FileType *.rb,*.coffee let w:m2=matchadd('LineOverflow', '\%>100v.\+', -1)
+autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee autocmd WinEnter *.rb,*.coffee let w:created=1
+autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee let w:created=1
+
+" gp remaps to "select recently changed text" (e.g. from paste)
+nnoremap gp `[v`]
 
 " Remaps Git Gutter hunk movement from ]h, [h to gh, gH
 nmap gh <Plug>GitGutterNextHunk
@@ -39,6 +54,11 @@ let g:airline_mode_map = {
     \ '' : 'S',
     \ }
 
+" Vim-Do async shell configs
+let g:check_interval = 500
+let g:do_new_buffer_size = 10
+let g:do_refresh_key = "<F37>"
+
 " Gundo
 nnoremap U :GundoToggle<CR>
 set undofile
@@ -48,7 +68,9 @@ set undodir=~/.vim/undo
 " Use the maintained version of CtrlP:
 " https://github.com/ctrlpvim/ctrlp.vim
 if executable('ag')
-  let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
+  if !empty(glob("~/.vimrc/bundle/ctrlp-cmatcher/autoload/matcher.vim"))
+    let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
+  endif
   let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
   noremap <leader>f :CtrlPClearCache<CR>:CtrlPRoot<CR>
 else
@@ -57,6 +79,18 @@ else
   let g:ctrlp_cache_dir = $HOME . '/.cache/ctrlp'
   noremap <leader>f :CtrlPRoot<CR>
 endif
+
+" Smart tab completion. Credit: Gary Bernhardt
+function! InsertTabWrapper()
+  let col = col('.') - 1
+  if !col || getline('.')[col - 1] !~ '\k'
+ return "\<tab>"
+  else
+ return "\<c-p>"
+  endif
+endfunction
+inoremap <tab> <c-r>=InsertTabWrapper()<cr>
+inoremap <s-tab> <c-n>
 
 " Only for Colemak keyboards, remap hjkl
 "noremap k j
@@ -71,23 +105,26 @@ endif
 
 " opens search results in a window w/ links and highlight the matches
 if executable('ag')
-  command! -nargs=+ AG execute 'silent Ag! <args>' | copen 33 | redraw! | execute 'silent /<args>'
-  " leader + D searches for the word under the cursor
-  nmap <leader>d :AG <c-r>=expand("<cword>")<cr><cr>
+  command! -nargs=+ Grep execute 'silent Ag! "<args>"' | copen 15 | redraw! | execute 'silent /<args>'
 else
-  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=tags --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* . -e <args>' | copen 33 | redraw! | execute 'silent /<args>'
-  " leader + D searches for the word under the cursor
-  nmap <leader>d :Grep <c-r>=expand("<cword>")<cr><cr>
+  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=tags --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* . -e "<args>"' | copen 15 | redraw! | execute 'silent /"<args>"'
 endif
+" leader + D searches for the word under the cursor
+nmap <leader>d :Grep <c-r>=expand("<cword>")<cr><cr>
 
 " Test helpers from Gary Bernhardt's screen cast:
 " https://www.destroyallsoftware.com/screencasts/catalog/file-navigation-in-vim
 " https://www.destroyallsoftware.com/file-navigation-in-vim.html
-function! RunTests(filename)
+function! RunTests(filename, async)
     " Write the file and run tests for the given filename
     :w
-    :silent !echo;echo;echo;echo;echo
-    exec ":!time spring rspec " . a:filename
+    ":silent !echo;echo;echo;echo;echo
+    "exec ":cexpr system('spring rspec " . a:filename . "') | copen | redraw!"
+    if a:async == 'async'
+      exec ":Do spring rspec " . a:filename
+    else
+      exec ":!time spring rspec " . a:filename
+    endif
 endfunction
 
 function! SetTestFile()
@@ -95,31 +132,82 @@ function! SetTestFile()
     let t:grb_test_file=@%
 endfunction
 
-function! RunTestFile(...)
-    if a:0
-        let command_suffix = a:1
-    else
-        let command_suffix = ""
-    endif
-
+function! RunTestFile(async)
     " Run the tests for the previously-marked file.
     let in_spec_file = match(expand("%"), '_spec.rb$') != -1
     if in_spec_file
         call SetTestFile()
     elseif !exists("t:grb_test_file")
         return
-    end
-    call RunTests(t:grb_test_file . command_suffix)
+    endif
+
+    call RunTests(t:grb_test_file, a:async)
 endfunction
 
-function! RunNearestTest()
+function! RunNearestTest(async)
     let spec_line_number = line('.')
-    call RunTestFile(":" . spec_line_number)
+    call RunTestFile(":" . spec_line_number, a:async)
 endfunction
 
 " Run this file
-map <leader>m :call RunTestFile()<cr>
+map <leader>m :call RunTestFile('noasync')<cr>
 " Run only the example under the cursor
 map <leader>. :call RunNearestTest()<cr>
 " Run all test files
 " map <leader>a :call RunTests('spec')<cr>
+
+" Autocreate parent directory on file save
+function! s:MkNonExDir(file, buf)
+    if empty(getbufvar(a:buf, '&buftype')) && a:file!~#'\v^\w+\:\/'
+        let dir=fnamemodify(a:file, ':h')
+        if !isdirectory(dir)
+            call mkdir(dir, 'p')
+        endif
+    endif
+endfunction
+augroup BWCCreateDir
+    autocmd!
+    autocmd BufWritePre * :call s:MkNonExDir(expand('<afile>'), +expand('<abuf>'))
+augroup END
+
+function! ConfigurePluginAfterLoad()
+  " Run this spec file asynchronously if vim-do plugin exists
+  if exists(':DoAgain')
+    map <leader>a :call RunTestFile('async')<cr>
+  endif
+endfunction
+
+au VimEnter * call ConfigurePluginAfterLoad()
+
+"""""" Language specific auto-expansion
+""" Generic Bracket-based language
+function! GenericAutoExpansion()
+  inoremap <buffer> { {}<Left>
+  inoremap <buffer> {<CR> {<CR><SPACE><CR>}<Up><C-O>$<BS>
+  inoremap <buffer> {{ {
+  inoremap <buffer> ( ()<Left>
+  inoremap <buffer> () ()
+  inoremap <buffer> (( (
+  inoremap <buffer> [ []<Left>
+  inoremap <buffer> [[ [
+endfunction
+au BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.rst,*.c,*.cpp call GenericAutoExpansion()
+
+""" JavaScript
+function! JSAutoExpansion()
+  imap <buffer> function<space> function() {<CR><Up><C-O>$<C-O>b<SPACE>
+endfunction
+au BufEnter,VimEnter,FileType *.js call JSAutoExpansion()
+
+""" RUBY
+function! RubyAutoExpansion()
+  inoremap <buffer> do<Space> do<Cr>end<Up><C-O>$<Space>
+  inoremap <buffer> do<CR> do<CR><SPACE><CR>end<Up><C-O>$<BS>
+  inoremap <buffer> def<Space> def<CR>end<Up><C-O>$<Space>
+  inoremap <buffer> dd d
+  inoremap <buffer> class<Space> class<CR>end<Up><c-o>$<Space>
+  inoremap <buffer> cc c
+  inoremap <buffer> module<Space> module<CR>end<Up><c-o>$<Space>
+  inoremap <buffer> mm m
+endfunction
+au BufEnter,VimEnter,FileType *.rb call RubyAutoExpansion()
