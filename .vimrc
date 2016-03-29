@@ -68,7 +68,7 @@ set undodir=~/.vim/undo
 " Use the maintained version of CtrlP:
 " https://github.com/ctrlpvim/ctrlp.vim
 if executable('ag')
-  if !empty(glob("~/.vimrc/bundle/ctrlp-cmatcher/autoload/matcher.vim"))
+  if !empty(glob("~/.vim/bundle/ctrlp-cmatcher/autoload/matcher.vim"))
     let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
   endif
   let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
