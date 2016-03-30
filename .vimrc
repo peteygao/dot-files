@@ -181,14 +181,48 @@ endfunction
 au VimEnter * call ConfigurePluginAfterLoad()
 
 """""" Language specific auto-expansion
-" This function will only expand if it's at the beginning of the line
-function! ConditionalExpansionMap(open, close)
-  let line = getline('.')
-  let col = col('.')
-  if col > indent('.') + 1
-    return a:open
-  else
-    return a:open . a:close
+" Pass in a list of mappings of expansions
+" Arg1: The search string
+" Arg2: The expansion string
+" Arg3: The line position the character can appear and still be matched
+function! ConditionalExpansionMap(trigger_char, mapping_list)
+  for mapping in a:mapping_list
+    let result = ''
+    if a:trigger_char == "\<SPACE>"
+      let result = SpaceExpansion(mapping[0], mapping[1], mapping[2])
+    endif
+
+    if result != ''
+      return result
+    endif
+  endfor
+
+  return a:trigger_char
+endf
+
+" This function will check for expansion match, and optionally expand if it's
+" at the beginning of the line (line_pos == '^')
+" at the end of the line (line_pos == '$')
+" or anywhere (line_pos == '.')
+function! SpaceExpansion(check, output, line_pos)
+  let start    = indent('.') + 1
+  let col      = col('.')
+  let char_len = strchars(a:check)
+
+  " The char_len + 1 is because we need to rewind an extra step to account for
+  " the space that's inserted prior to triggering of this mapping
+  if strpart(getline('.'), col('.') - (char_len + 1), char_len) == a:check
+    if a:line_pos == '^'
+      if col('.') - (char_len + 1) == indent('.')
+        return a:output
+      endif
+    elseif a:line_pos == '$'
+      if col('.') == col('$')
+        return a:output
+      endif
+    elseif a:line_pos == '.'
+      return a:output
+    endif
   endif
 endf
 
@@ -216,23 +250,32 @@ endfunction
 au BufEnter,VimEnter,FileType *.js call JSAutoExpansion()
 
 function! RubyAutoExpansion()
-  inoremap <buffer><expr> def<SPACE> ConditionalExpansionMap('def ', '<CR>end<Up><C-O>$')
-  inoremap <buffer> do<Space> do<Cr>end<Up><C-O>$<Space>
-  inoremap <buffer> do<CR> do<CR><SPACE><CR>end<Up><C-O>$<BS>
-  inoremap <buffer> dd d
-  inoremap <buffer><expr> class<SPACE> ConditionalExpansionMap('class ', '<CR>end<Up><c-o>$')
-  inoremap <buffer> cc c
-  inoremap <buffer><expr> module<SPACE> ConditionalExpansionMap('module ', '<CR>end<Up><c-o>$')
-  inoremap <buffer> mm m
+  inoremap <buffer><expr> <SPACE>
+        \ ConditionalExpansionMap(
+        \ "\<SPACE>",
+        \ [
+        \   ['class', '<CR>end<UP><C-O>$<SPACE>', '^'],
+        \   ['module', '<CR>end<UP><C-O>$<SPACE>', '^'],
+        \   ['def', '<CR>end<UP><C-O>$<SPACE>', '^'],
+        \   ['do', '<CR>end<UP><C-O>$<SPACE>', '$'],
+        \ ])
+  "inoremap <buffer> do<CR> do<CR><SPACE><CR>end<Up><C-O>$<BS>
 endfunction
 au BufEnter,VimEnter,FileType *.rb call RubyAutoExpansion()
 
 function! RubySpecAutoExpansion()
-  inoremap <buffer><expr> describe<SPACE> ConditionalExpansionMap('describe ', "'' do<CR>end<UP><C-O>f'<RIGHT>")
-  inoremap <buffer> dd d
-  inoremap <buffer><expr> it<SPACE> ConditionalExpansionMap('it ', "'' do<CR>end<UP><C-O>f'")
-  inoremap <buffer> ii i
-  inoremap <buffer><expr> context<SPACE> ConditionalExpansionMap('context ', "'' do<CR>end<UP><C-O>f'<RIGHT>")
-  inoremap <buffer> cc c
+  inoremap <buffer><expr> <SPACE>
+        \ ConditionalExpansionMap(
+        \ "\<SPACE>",
+        \ [
+        \   ['class', '<CR>end<UP><C-O>$<SPACE>', '^'],
+        \   ['module', '<CR>end<UP><C-O>$<SPACE>', '^'],
+        \   ['def', '<CR>end<UP><C-O>$<SPACE>', '^'],
+        \   ['do', '<CR>end<UP><C-O>$<SPACE>', '$'],
+        \
+        \   ['context', " '' do<CR>end<UP><C-O>f'<RIGHT>", '^'],
+        \   ['describe', " '' do<CR>end<UP><C-O>f'<RIGHT>", '^'],
+        \   ['it', " '' do<CR>end<UP><C-O>f'", '^'],
+        \ ])
 endfunction
 au BufEnter,VimEnter,FileType *_spec.rb call RubySpecAutoExpansion()
