@@ -146,13 +146,13 @@ endfunction
 
 function! RunNearestTest(async)
     let spec_line_number = line('.')
-    call RunTestFile(":" . spec_line_number, a:async)
+    call RunTestFile(a:async)
 endfunction
 
 " Run this file
 map <leader>m :call RunTestFile('noasync')<cr>
 " Run only the example under the cursor
-map <leader>. :call RunNearestTest()<cr>
+map <leader>. :call RunNearestTest('noasync')<cr>
 " Run all test files
 " map <leader>a :call RunTests('spec')<cr>
 
@@ -180,34 +180,58 @@ endfunction
 au VimEnter * call ConfigurePluginAfterLoad()
 
 """""" Language specific auto-expansion
+" This function will only expand if it's at the beginning of the line
+function! ConditionalExpansionMap(open, close)
+  let line = getline('.')
+  let col = col('.')
+  if col > indent('.') + 1
+    return a:open
+  else
+    return a:open . a:close
+  endif
+endf
+
 """ Generic Bracket-based language
 function! GenericAutoExpansion()
+  " { }
   inoremap <buffer> { {}<Left>
   inoremap <buffer> {<CR> {<CR><SPACE><CR>}<Up><C-O>$<BS>
   inoremap <buffer> {{ {
+  inoremap <buffer><expr> }  strpart(getline('.'), col('.')-1, 1) == "}" ? "\<Right>" : "}"
+  " ( )
   inoremap <buffer> ( ()<Left>
-  inoremap <buffer> () ()
   inoremap <buffer> (( (
+  inoremap <buffer><expr> )  strpart(getline('.'), col('.')-1, 1) == ")" ? "\<Right>" : ")"
+  " [ ]
   inoremap <buffer> [ []<Left>
   inoremap <buffer> [[ [
+  inoremap <buffer><expr> ]  strpart(getline('.'), col('.')-1, 1) == "]" ? "\<Right>" : "]"
 endfunction
 au BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.rst,*.c,*.cpp call GenericAutoExpansion()
 
-""" JavaScript
 function! JSAutoExpansion()
   imap <buffer> function<space> function() {<CR><Up><C-O>$<C-O>b<SPACE>
 endfunction
 au BufEnter,VimEnter,FileType *.js call JSAutoExpansion()
 
-""" RUBY
 function! RubyAutoExpansion()
+  inoremap <buffer><expr> def<SPACE> ConditionalExpansionMap('def ', '<CR>end<Up><C-O>$')
   inoremap <buffer> do<Space> do<Cr>end<Up><C-O>$<Space>
   inoremap <buffer> do<CR> do<CR><SPACE><CR>end<Up><C-O>$<BS>
-  inoremap <buffer> def<Space> def<CR>end<Up><C-O>$<Space>
   inoremap <buffer> dd d
-  inoremap <buffer> class<Space> class<CR>end<Up><c-o>$<Space>
+  inoremap <buffer><expr> class<SPACE> ConditionalExpansionMap('class ', '<CR>end<Up><c-o>$')
   inoremap <buffer> cc c
-  inoremap <buffer> module<Space> module<CR>end<Up><c-o>$<Space>
+  inoremap <buffer><expr> module<SPACE> ConditionalExpansionMap('module ', '<CR>end<Up><c-o>$')
   inoremap <buffer> mm m
 endfunction
 au BufEnter,VimEnter,FileType *.rb call RubyAutoExpansion()
+
+function! RubySpecAutoExpansion()
+  inoremap <buffer><expr> describe<SPACE> ConditionalExpansionMap('describe ', "'' do<CR>end<UP><C-O>f'<RIGHT>")
+  inoremap <buffer> dd d
+  inoremap <buffer><expr> it<SPACE> ConditionalExpansionMap('it ', "'' do<CR>end<UP><C-O>f'")
+  inoremap <buffer> ii i
+  inoremap <buffer><expr> context<SPACE> ConditionalExpansionMap('context ', "'' do<CR>end<UP><C-O>f'<RIGHT>")
+  inoremap <buffer> cc c
+endfunction
+au BufEnter,VimEnter,FileType *_spec.rb call RubySpecAutoExpansion()
