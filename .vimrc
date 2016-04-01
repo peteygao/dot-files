@@ -122,7 +122,10 @@ function! RunTests(filename, async)
     ":silent !echo;echo;echo;echo;echo
     "exec ":cexpr system('spring rspec " . a:filename . "') | copen | redraw!"
     if a:async == 'async'
-      exec ":Do spring rspec " . a:filename
+      exec ":DoQuietly spring rspec " . a:filename
+      exec ":Done"
+      exec ":Done"
+      exec ":Done"
     else
       exec ":!time spring rspec " . a:filename
     endif
@@ -190,6 +193,10 @@ function! ConditionalExpansionMap(trigger_char, mapping_list)
     let result = ''
     if a:trigger_char == "\<SPACE>"
       let result = SpaceExpansion(mapping[0], mapping[1], mapping[2])
+    elseif a:trigger_char == "\<CR>"
+      let result = EnterExpansion(mapping[0], mapping[1], mapping[2])
+    else
+      let result = CharExpansion(mapping[0], mapping[1], mapping[2])
     endif
 
     if result != ''
@@ -211,13 +218,13 @@ function! SpaceExpansion(check, output, line_pos)
 
   " The char_len + 1 is because we need to rewind an extra step to account for
   " the space that's inserted prior to triggering of this mapping
-  if strpart(getline('.'), col('.') - (char_len + 1), char_len) == a:check
+  if strpart(getline('.'), col - (char_len + 1), char_len) == a:check
     if a:line_pos == '^'
-      if col('.') - (char_len + 1) == indent('.')
+      if col - char_len == start
         return a:output
       endif
     elseif a:line_pos == '$'
-      if col('.') == col('$')
+      if col == col('$')
         return a:output
       endif
     elseif a:line_pos == '.'
@@ -226,26 +233,77 @@ function! SpaceExpansion(check, output, line_pos)
   endif
 endf
 
+function! EnterExpansion(check, output, line_pos)
+  let pos      = col('.')
+  let char_len = strchars(a:check)
+
+  if strpart(getline('.'), pos - (char_len + 1), char_len) == a:check
+    return CharExpansion(a:check, a:output, a:line_pos)
+  endif
+endf
+
+function! CharExpansion(check, output, line_pos)
+  let start    = indent('.') + 1
+  let col      = col('.')
+
+  if a:line_pos == '^'
+    if col == start
+      return a:output
+    endif
+  elseif a:line_pos == '$'
+    if col == col('$')
+      return a:output
+    endif
+  elseif a:line_pos == '.'
+    return a:output
+  endif
+endf
+
 """ Generic Bracket-based language
 function! GenericAutoExpansion()
   " { }
-  inoremap <buffer> { {}<Left>
-  inoremap <buffer> {<CR> {<CR><SPACE><CR>}<Up><C-O>$<BS>
-  inoremap <buffer> {{ {
-  inoremap <buffer><expr> }  strpart(getline('.'), col('.')-1, 1) == "}" ? "\<Right>" : "}"
+  inoremap <buffer><expr> {
+        \ ConditionalExpansionMap(
+        \ "{",
+        \ [
+        \   ['{', '{}<LEFT>', '$'],
+        \ ])
+  inoremap <buffer><expr> <CR> 
+        \ ConditionalExpansionMap(
+        \ "\<CR>",
+        \ [
+        \   ["{", "<CR><CR><UP><C-O>$<TAB>", '.'],
+        \   ["(", "<CR><CR><BS><UP><C-O>$<TAB>", '.'],
+        \   ["[", "<CR><CR><UP><C-O>$<TAB>", '.'],
+        \ ])
+  inoremap <buffer><expr> } strpart(getline('.'), col('.')-1, 1) == "}" ? "\<Right>" : "}"
   " ( )
-  inoremap <buffer> ( ()<Left>
-  inoremap <buffer> (( (
-  inoremap <buffer><expr> )  strpart(getline('.'), col('.')-1, 1) == ")" ? "\<Right>" : ")"
+  inoremap <buffer><expr> (
+        \ ConditionalExpansionMap(
+        \ "(",
+        \ [
+        \   ['(', '()<LEFT>', '$'],
+        \ ])
+  inoremap <buffer><expr> ) strpart(getline('.'), col('.')-1, 1) == ")" ? "\<Right>" : ")"
   " [ ]
-  inoremap <buffer> [ []<Left>
-  inoremap <buffer> [[ [
-  inoremap <buffer><expr> ]  strpart(getline('.'), col('.')-1, 1) == "]" ? "\<Right>" : "]"
+  inoremap <buffer><expr> [
+        \ ConditionalExpansionMap(
+        \ "[",
+        \ [
+        \   ['[', '[]<LEFT>', '$'],
+        \ ])
+  inoremap <buffer><expr> ] strpart(getline('.'), col('.')-1, 1) == "]" ? "\<Right>" : "]"
 endfunction
 au BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.rst,*.c,*.cpp call GenericAutoExpansion()
 
 function! JSAutoExpansion()
-  imap <buffer> function<space> function() {<CR><Up><C-O>$<C-O>b<SPACE>
+  inoremap <buffer><expr> <SPACE>
+        \ ConditionalExpansionMap(
+        \ "\<SPACE>",
+        \ [
+        \   ['function', '  {<CR>}<Up><C-O>$<LEFT><LEFT>', '.'],
+        \   ['.constructor', ' = function  {<CR>}<Up><C-O>$<LEFT><LEFT>', '$'],
+        \ ])
 endfunction
 au BufEnter,VimEnter,FileType *.js call JSAutoExpansion()
 
