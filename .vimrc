@@ -137,11 +137,15 @@ function! SetTestFile()
 endfunction
 
 function! RunTestFile(...)
-    if a:0 != ''
+    if a:0 && a:1 != ''
       let command_suffix = a:1
     else
       let command_suffix = ""
     endif
+
+    if a:0 > 1
+      let async = a:2
+    end
 
     " Run the tests for the previously-marked file.
     let in_spec_file = match(expand("%"), '_spec.rb$') != -1
@@ -151,7 +155,7 @@ function! RunTestFile(...)
         return
     endif
 
-    call RunTests(t:grb_test_file . command_suffix, a:2)
+    call RunTests(t:grb_test_file . command_suffix, async)
 endfunction
 
 function! RunNearestTest(async)
@@ -160,7 +164,7 @@ function! RunNearestTest(async)
 endfunction
 
 " Run this file
-map <leader>m :call RunTestFile('','','noasync')<cr>
+map <leader>m :call RunTestFile('','noasync')<cr>
 " Run only the example under the cursor
 map <leader>. :call RunNearestTest('noasync')<cr>
 " Run all test files
@@ -183,7 +187,7 @@ augroup END
 function! ConfigurePluginAfterLoad()
   " Run this spec file asynchronously if vim-do plugin exists
   if exists(':DoAgain')
-    map <leader>a :call RunTestFile('','', 'async')<cr>
+    map <leader>a :call RunTestFile('', 'async')<cr>
   endif
 endfunction
 
