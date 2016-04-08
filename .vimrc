@@ -68,17 +68,16 @@ set undodir=~/.vim/undo
 " CtrlP + CtrlP-Cmatcher
 " Use the maintained version of CtrlP:
 " https://github.com/ctrlpvim/ctrlp.vim
-if executable('ag')
-  if !empty(glob("~/.vim/bundle/ctrlp-cmatcher/autoload/matcher.vim"))
-    let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
-  endif
+if executable('ag') && !empty(glob("~/.vim/bundle/ctrlp-cmatcher/autoload/matcher.vim"))
+  let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
   let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
   noremap <leader>f :CtrlPClearCache<CR>:CtrlPRoot<CR>
 else
-  let g:ctrlp_lazy_update = 75
-  set wildignore+=*/tmp/*,*/img/*,*/images/*,*/imgs/*,*.so,*.swp,*.zip,*/\.git/*,*/log/*
+  let g:ctrlp_lazy_update = 100
+  set wildignore+=*/tmp/*,*/img/*,*/images/*,*/imgs/*,*.so,*.swp,*.zip,*/\.git/*,*/log/*,*/node_modules/*,\.bundle/*,deps/*
   let g:ctrlp_cache_dir = $HOME . '/.cache/ctrlp'
   noremap <leader>f :CtrlPRoot<CR>
+  noremap <leader><S-F> :CtrlPClearCache<CR>:CtrlPRoot<CR>
 endif
 
 " Smart tab completion. Credit: Gary Bernhardt
@@ -108,7 +107,7 @@ inoremap <s-tab> <c-n>
 if exists(':Ag')
   command! -nargs=+ Grep execute 'silent Ag! "<args>"' | copen 15 | redraw! | execute 'silent /<args>'
 else
-  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=tags --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* . -e "<args>"' | copen 15 | redraw! | execute 'silent /"<args>"'
+  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=tags --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* --exclude-dir=*\node_modules\* . -e "<args>"' | copen 15 | redraw! | execute 'silent /"<args>"'
 endif
 " leader + D searches for the word under the cursor
 nmap <leader>d :Grep <c-r>=expand("<cword>")<cr><cr>
@@ -278,7 +277,7 @@ function! GenericAutoExpansion()
         \ [
         \   ['{', '{}<LEFT>', '$'],
         \ ])
-  inoremap <buffer><expr> <CR> 
+  inoremap <buffer><expr> <CR>
         \ ConditionalExpansionMap(
         \ "\<CR>",
         \ [
@@ -304,7 +303,7 @@ function! GenericAutoExpansion()
         \ ])
   inoremap <buffer><expr> ] strpart(getline('.'), col('.')-1, 1) == "]" ? "\<Right>" : "]"
 endfunction
-au BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.rst,*.c,*.cpp call GenericAutoExpansion()
+au BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.rst,*.c,*.cpp,*.ex,*.exs call GenericAutoExpansion()
 
 function! JSAutoExpansion()
   inoremap <buffer><expr> <SPACE>
@@ -327,7 +326,12 @@ function! RubyAutoExpansion()
         \   ['def', '<CR>end<UP><C-O>$<SPACE>', '^'],
         \   ['do', '<CR>end<UP><C-O>$<SPACE>', '$'],
         \ ])
-  "inoremap <buffer> do<CR> do<CR><SPACE><CR>end<Up><C-O>$<BS>
+  inoremap <buffer><expr> <CR>
+        \ ConditionalExpansionMap(
+        \ "\<CR>",
+        \ [
+        \   ["do", "<CR><SPACE><CR>end<UP><BS>", '.'],
+        \ ])
 endfunction
 au BufEnter,VimEnter,FileType *.rb call RubyAutoExpansion()
 
@@ -347,3 +351,20 @@ function! RubySpecAutoExpansion()
         \ ])
 endfunction
 au BufEnter,VimEnter,FileType *_spec.rb call RubySpecAutoExpansion()
+
+function! ElixirAutoExpansion()
+  inoremap <buffer><expr> <SPACE>
+        \ ConditionalExpansionMap(
+        \ "\<SPACE>",
+        \ [
+        \   ['defmodule', '<CR>end<UP><C-O>$<SPACE>', '^'],
+        \   ['do', '<CR>end<UP><C-O>$<SPACE>', '$'],
+        \ ])
+  inoremap <buffer><expr> <CR>
+        \ ConditionalExpansionMap(
+        \ "\<CR>",
+        \ [
+        \   ["do", "<CR><SPACE><CR>end<UP><BS>", '.'],
+        \ ])
+endfunction
+au BufEnter,VimEnter,FileType *.ex,*.exs call ElixirAutoExpansion()
