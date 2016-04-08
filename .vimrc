@@ -24,9 +24,9 @@ set listchars=tab:▸·
 highlight NonText guifg=#4a4a59
 highlight SpecialKey guifg=#4a4a59
 
-" 100 characters line width highlight
+" 80 characters line width highlight
 hi LineOverflow  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
-autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js let w:m2=matchadd('LineOverflow', '\%>100v.\+', -1)
+autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js let w:m2=matchadd('LineOverflow', '\%>80v.\+', -1)
 autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js autocmd WinEnter *.rb,*.coffee let w:created=1
 autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js let w:created=1
 
