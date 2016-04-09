@@ -26,9 +26,9 @@ highlight SpecialKey guifg=#4a4a59
 
 " 80 characters line width highlight
 hi LineOverflow  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
-autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js let w:m2=matchadd('LineOverflow', '\%>80v.\+', -1)
-autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js autocmd WinEnter *.rb,*.coffee let w:created=1
-autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js let w:created=1
+autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.ex,*.exs let w:m2=matchadd('LineOverflow', '\%>80v.\+', -1)
+autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.ex,*.exs autocmd WinEnter *.rb,*.coffee let w:created=1
+autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.ex,*.exs let w:created=1
 
 " gp remaps to "select recently changed text" (e.g. from paste)
 nnoremap gp `[v`]
@@ -105,9 +105,9 @@ inoremap <s-tab> <c-n>
 
 " opens search results in a window w/ links and highlight the matches
 if exists(':Ag')
-  command! -nargs=+ Grep execute 'silent Ag! "<args>"' | copen 15 | redraw! | execute 'silent /<args>'
+  command! -nargs=+ Grep execute 'silent Ag! "' . substitute(<args>, '"', '\"', 'g') . '"' | copen 15 | redraw! | execute 'silent /<args>'
 else
-  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=tags --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* --exclude-dir=*\node_modules\* . -e "<args>"' | copen 15 | redraw! | execute 'silent /<args>'
+  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=tags --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* --exclude-dir=*\node_modules\* . -e "' . substitute(<args>, '"', '\"', 'g') . '"' | copen 15 | redraw! | execute 'silent /<args>'
 endif
 " leader + D searches for the word under the cursor
 nmap <leader>d :Grep <c-r>=expand("<cword>")<cr><cr>
