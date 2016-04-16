@@ -68,12 +68,15 @@ set undodir=~/.vim/undo
 " CtrlP + CtrlP-Cmatcher
 " Use the maintained version of CtrlP:
 " https://github.com/ctrlpvim/ctrlp.vim
-if executable('ag') && !empty(glob("~/.vim/bundle/ctrlp-cmatcher/autoload/matcher.vim"))
-  let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
+if executable('ag')
+  let g:ctrlp_lazy_update = 30
+  if !empty(glob("~/.vim/bundle/ctrlp-cmatcher/autoload/matcher.vim"))
+    let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
+  endif
   let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
   noremap <leader>f :CtrlPClearCache<CR>:CtrlPRoot<CR>
 else
-  let g:ctrlp_lazy_update = 100
+  let g:ctrlp_lazy_update = 75
   set wildignore+=*/tmp/*,*/img/*,*/images/*,*/imgs/*,*.so,*.swp,*.zip,*/\.git/*,*/log/*,*/node_modules/*,\.bundle/*,deps/*
   let g:ctrlp_cache_dir = $HOME . '/.cache/ctrlp'
   noremap <leader>f :CtrlPRoot<CR>
@@ -105,9 +108,9 @@ inoremap <s-tab> <c-n>
 
 " opens search results in a window w/ links and highlight the matches
 if exists(':Ag')
-  command! -nargs=+ Grep execute 'silent Ag! "' . substitute(<args>, '"', '\"', 'g') . '"' | copen 15 | redraw! | execute 'silent /<args>'
+  command! -nargs=+ Grep execute 'silent Ag! "<args>"' | copen 15 | redraw! | execute 'silent /<args>'
 else
-  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=tags --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* --exclude-dir=*\node_modules\* . -e "' . substitute(<args>, '"', '\"', 'g') . '"' | copen 15 | redraw! | execute 'silent /<args>'
+  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=tags --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* --exclude-dir=*\node_modules\* . -e "<args>"' | copen 15 | redraw! | execute 'silent /"<args>"'
 endif
 " leader + D searches for the word under the cursor
 nmap <leader>d :Grep <c-r>=expand("<cword>")<cr><cr>
@@ -122,8 +125,6 @@ function! RunTests(filename, async)
     "exec ":cexpr system('spring rspec " . a:filename . "') | copen | redraw!"
     if a:async == 'async'
       exec ":DoQuietly spring rspec " . a:filename
-      exec ":Done"
-      exec ":Done"
       exec ":Done"
     else
       exec ":!time spring rspec " . a:filename
@@ -276,14 +277,6 @@ function! GenericAutoExpansion()
         \ "{",
         \ [
         \   ['{', '{}<LEFT>', '$'],
-        \ ])
-  inoremap <buffer><expr> <CR>
-        \ ConditionalExpansionMap(
-        \ "\<CR>",
-        \ [
-        \   ["{", "<CR><CR><UP><C-O>$<TAB>", '.'],
-        \   ["(", "<CR><CR><BS><UP><C-O>$<TAB>", '.'],
-        \   ["[", "<CR><CR><UP><C-O>$<TAB>", '.'],
         \ ])
   inoremap <buffer><expr> } strpart(getline('.'), col('.')-1, 1) == "}" ? "\<Right>" : "}"
   " ( )
