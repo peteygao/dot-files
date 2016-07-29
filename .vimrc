@@ -110,7 +110,7 @@ inoremap <s-tab> <c-n>
 if exists(':Ag')
   command! -nargs=+ Grep execute 'silent Ag! "<args>"' | copen 15 | redraw! | execute 'silent /<args>'
 else
-  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=tags --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* --exclude-dir=*\node_modules\* . -e "<args>"' | copen 15 | redraw! | execute 'silent /"<args>"'
+  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=\*.min.js --exclude=tags --exclude-dir=coverage --exclude-dir=vendor --exclude-dir=node_modules --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* . -e "<args>"' | copen 15 | redraw! | execute 'silent /<args>'
 endif
 " leader + D searches for the word under the cursor
 nmap <leader>d :Grep <c-r>=expand("<cword>")<cr><cr>
