@@ -2,6 +2,7 @@ set t_Co=16
 
 let mapleader=" "
 
+set number
 set undofile
 set undodir=~/.vim/undo
 set showmode                    " always show what mode we're currently editing in
@@ -23,6 +24,8 @@ set list
 set listchars=tab:▸·
 highlight NonText guifg=#4a4a59
 highlight SpecialKey guifg=#4a4a59
+nnoremap <C-L> :nohl<CR>
+nnoremap <C-N> :set number!<CR>
 
 " 80 characters line width highlight
 hi LineOverflow  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
@@ -30,8 +33,14 @@ autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.ex,*.exs let w:m2=matcha
 autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.ex,*.exs autocmd WinEnter *.rb,*.coffee let w:created=1
 autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.ex,*.exs let w:created=1
 
+"********************
+" Custom keybindings
+"********************
 " gp remaps to "select recently changed text" (e.g. from paste)
 nnoremap gp `[v`]
+nnoremap <Leader>sc :tabe db/schema.rb<CR>
+nnoremap <Leader>rs :source ~/.vimrc<CR>
+nnoremap <C-S> :w<CR>
 
 " Remaps Git Gutter hunk movement from ]h, [h to gh, gH
 nmap gh <Plug>GitGutterNextHunk
@@ -110,7 +119,7 @@ inoremap <s-tab> <c-n>
 if exists(':Ag')
   command! -nargs=+ Grep execute 'silent Ag! "<args>"' | copen 15 | redraw! | execute 'silent /<args>'
 else
-  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=\*.min.js --exclude=tags --exclude-dir=coverage --exclude-dir=vendor --exclude-dir=node_modules --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* . -e "<args>"' | copen 15 | redraw! | execute 'silent /<args>'
+  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=\*.min.js --exclude=tags --exclude-dir=coverage --exclude-dir=vendor --exclude-dir=node_modules --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* . -e ""<args>""' | copen 15 | redraw! | execute 'silent /<args>'
 endif
 " leader + D searches for the word under the cursor
 nmap <leader>d :Grep <c-r>=expand("<cword>")<cr><cr>
