@@ -1,0 +1,5 @@
+#!/bin/bash
+
+filename=$(echo $1 | cut -d":" -f1)
+lineNumber=$(echo $1 | cut -d":" -f2)
+vim $filename +$lineNumber
