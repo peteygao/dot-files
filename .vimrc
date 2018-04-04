@@ -13,8 +13,9 @@ set autoindent
 set ignorecase
 set smartcase
 set clipboard=unnamed           " copy the default buffer to clipboard
+set ttyfast
 set lazyredraw
-set re=1
+set re=1                        " Use version 1 of regexp engine (faster for Ruby syntax highlighting)
 execute pathogen#infect()
 syntax on
 filetype plugin indent on
