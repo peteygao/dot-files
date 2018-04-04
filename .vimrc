@@ -26,7 +26,27 @@ set listchars=tab:▸·
 highlight NonText guifg=#4a4a59
 highlight SpecialKey guifg=#4a4a59
 nnoremap <C-L> :nohl<CR>
-nnoremap <C-N> :set number!<CR>
+
+function! NumberToggle()
+  if(&relativenumber == 1 && &number == 1)
+    set norelativenumber
+    set nonumber
+  elseif(&number == 1)
+    set nonumber
+  else
+    set relativenumber
+    set number
+  endif
+endfunc
+
+nnoremap <C-N> :call NumberToggle()<cr>
+
+inoremap <C-C> <ESC>
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave,WinEnter * if &nu | set rnu   | endif
+  autocmd BufLeave,FocusLost,InsertEnter,WinLeave   * if &nu | set nornu | endif
+augroup END
 
 " 80 characters line width highlight
 hi LineOverflow  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
