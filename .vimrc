@@ -3,8 +3,6 @@ set t_Co=16
 let mapleader=" "
 
 set number
-set undofile
-set undodir=~/.vim/undo
 set showmode                    " always show what mode we're currently editing in
 set expandtab                   " expand tabs by default (overloadable per file type later) (WARNING: this gets reset when :set paste is true!)
 set tabstop=2                   " a tab is four spaces
@@ -15,6 +13,8 @@ set autoindent
 set ignorecase
 set smartcase
 set clipboard=unnamed           " copy the default buffer to clipboard
+set lazyredraw
+set re=1
 execute pathogen#infect()
 syntax on
 filetype plugin indent on
