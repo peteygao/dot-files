@@ -5,10 +5,6 @@ let mapleader=" "
 set number
 set showmode                    " always show what mode we're currently editing in
 set expandtab                   " expand tabs by default (overloadable per file type later) (WARNING: this gets reset when :set paste is true!)
-set tabstop=2                   " a tab is four spaces
-set softtabstop=2               " when hitting <BS>, pretend like a tab is removed, even if spaces
-set shiftwidth=2                " number of spaces to use for autoindenting
-set bs=2
 set autoindent
 set ignorecase
 set smartcase
@@ -16,7 +12,6 @@ set clipboard=unnamed           " copy the default buffer to clipboard
 set ttyfast
 set lazyredraw
 set re=1                        " Use version 1 of regexp engine (faster for Ruby syntax highlighting)
-execute pathogen#infect()
 syntax on
 filetype plugin indent on
 set hlsearch
@@ -26,6 +21,39 @@ set listchars=tab:▸·
 highlight NonText guifg=#4a4a59
 highlight SpecialKey guifg=#4a4a59
 nnoremap <C-L> :nohl<CR>
+" Ctrl+C when in Input mode sends ESC
+inoremap <C-C> <ESC>
+
+"***************************
+" vim-plug PLUGIN management
+"***************************
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+call plug#begin()
+Plug 'w0rp/ale'
+Plug 'vim-airline/vim-airline'
+Plug 'simnalamburt/vim-mundo'
+Plug 'ctrlpvim/ctrlp.vim'
+" To install & compile ctrlp-cmatcher:
+" [sudo] apt-get install build-essentials python-dev silversearcher-ag
+" Silver Searcher is strictly speaking not necessary, but without it
+" ctrlp-cmatcher won't be enabled (as per this .vimrc config file)
+Plug 'JazzCore/ctrlp-cmatcher', { 'do': './install.sh' }
+Plug 'tpope/vim-sleuth'
+" To use `elm-vim`, the following NPM packages must be installed:
+" `elm`, `elm-format`, `elm-oracle`, `elm-test`
+Plug 'ElmCast/elm-vim'
+Plug 'tpope/vim-abolish'
+Plug 'tomtom/tcomment_vim'
+Plug 'tpope/vim-speeddating'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-fugitive'
+call plug#end()
 
 function! NumberToggle()
   if(&relativenumber == 1 && &number == 1)
@@ -41,7 +69,6 @@ endfunc
 
 nnoremap <C-N> :call NumberToggle()<cr>
 
-inoremap <C-C> <ESC>
 augroup numbertoggle
   autocmd!
   autocmd BufEnter,FocusGained,InsertLeave,WinEnter * if &nu | set rnu   | endif
@@ -50,9 +77,8 @@ augroup END
 
 " 80 characters line width highlight
 hi LineOverflow  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
-autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.ex,*.exs let w:m2=matchadd('LineOverflow', '\%>80v.\+', -1)
-autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.ex,*.exs autocmd WinEnter *.rb,*.coffee let w:created=1
-autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.ex,*.exs let w:created=1
+autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:m2=matchadd('LineOverflow', '\%>80v.\+', -1)
+autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:created=1
 
 "********************
 " Custom keybindings
@@ -60,15 +86,17 @@ autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.ex,*.exs let w:
 " gp remaps to "select recently changed text" (e.g. from paste)
 nnoremap gp `[v`]
 nnoremap <Leader>sc :tabe db/schema.rb<CR>
-nnoremap <Leader>rs :source ~/.vimrc<CR>
+nnoremap <Leader>sv :source ~/.vimrc<CR>
+nnoremap <Leader>ev :tabe ~/.vimrc<CR>
 nnoremap <C-S> :w<CR>
+nnoremap <Leader>pi :PlugInstall<CR>
+nnoremap <Leader>pu :PlugUpdate<CR>
 
 " Remaps Git Gutter hunk movement from ]h, [h to gh, gH
 nmap gh <Plug>GitGutterNextHunk
 nmap gH <Plug>GitGutterPrevHunk
 
 " Vim-Airline
-"let g:airline#extensions#tabline#enabled = 1
 set laststatus=2
 let g:airline_mode_map = {
     \ '__' : '-',
@@ -82,7 +110,9 @@ let g:airline_mode_map = {
     \ 's'  : 'S',
     \ 'S'  : 'S',
     \ '' : 'S',
+    \ 't'  : 'T',
     \ }
+let g:airline#extensions#ale#enabled = 1
 
 " Vim-Do async shell configs
 let g:check_interval = 500
@@ -326,7 +356,7 @@ function! GenericAutoExpansion()
         \ ])
   inoremap <buffer><expr> ] strpart(getline('.'), col('.')-1, 1) == "]" ? "\<Right>" : "]"
 endfunction
-au BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.rst,*.c,*.cpp,*.ex,*.exs call GenericAutoExpansion()
+au BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.rst,*.c,*.cpp,*.ex,*.exs,*.elm call GenericAutoExpansion()
 
 function! JSAutoExpansion()
   inoremap <buffer><expr> <SPACE>
@@ -337,7 +367,7 @@ function! JSAutoExpansion()
         \   ['.constructor', ' = function  {<CR>}<Up><C-O>$<LEFT><LEFT>', '$'],
         \ ])
 endfunction
-au BufEnter,VimEnter,FileType *.js call JSAutoExpansion()
+au BufEnter,VimEnter,FileType *.js,*.jsx call JSAutoExpansion()
 
 function! RubyAutoExpansion()
   inoremap <buffer><expr> <SPACE>
