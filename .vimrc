@@ -75,9 +75,11 @@ augroup numbertoggle
   autocmd BufLeave,FocusLost,InsertEnter,WinLeave   * if &nu | set nornu | endif
 augroup END
 
-" 80 characters line width highlight
+" Highlight lines that are too long, and trailing spaces
 hi LineOverflow  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
-autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:m2=matchadd('LineOverflow', '\%>80v.\+', -1)
+autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:m2=matchadd('LineOverflow', '\%>80v.\+', -1) " Highlight lines longer than 80 chars
+autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:m2=matchadd('LineOverflow', '\s\+$', -1) " Highlight trailing spaces
+autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm autocmd WinEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:created=1
 autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:created=1
 
 "********************
@@ -170,7 +172,7 @@ inoremap <s-tab> <c-n>
 if exists(':Ag')
   command! -nargs=+ Grep execute 'silent Ag! "<args>"' | copen 15 | redraw! | execute 'silent /<args>'
 else
-  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=\*.min.js --exclude=tags --exclude-dir=coverage --exclude-dir=vendor --exclude-dir=node_modules --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* . -e ""<args>""' | copen 15 | redraw! | execute 'silent /<args>'
+  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=\*.min.js --exclude=tags --exclude-dir=coverage --exclude-dir=vendor --exclude-dir=node_modules --exclude-dir=*\dist\* --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* . -e ""<args>""' | copen 15 | redraw! | execute 'silent /<args>'
 endif
 " leader + D searches for the word under the cursor
 nmap <leader>d :Grep <c-r>=expand("<cword>")<cr><cr>
@@ -365,6 +367,13 @@ function! JSAutoExpansion()
         \ [
         \   ['function', '  {<CR>}<Up><C-O>$<LEFT><LEFT>', '.'],
         \   ['.constructor', ' = function  {<CR>}<Up><C-O>$<LEFT><LEFT>', '$'],
+        \   ['=>', ' {<CR>}<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <LEFT><LEFT>', '$'],
+        \ ])
+  inoremap <buffer><expr> <CR>
+        \ ConditionalExpansionMap(
+        \ "\<CR>",
+        \ [
+        \   ['=>', ' {<CR>}<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <LEFT><LEFT>', '.'],
         \ ])
 endfunction
 au BufEnter,VimEnter,FileType *.js,*.jsx call JSAutoExpansion()
@@ -378,6 +387,7 @@ function! RubyAutoExpansion()
         \   ['module', '<CR>end<UP><C-O>$<SPACE>', '^'],
         \   ['def', '<CR>end<UP><C-O>$<SPACE>', '^'],
         \   ['do', '<CR>end<UP><C-O>$<SPACE>', '$'],
+        \   ['class <<', '<SPACE>self<cr><CR>def<SPACE><CR>end<cr><UP><UP><C-O>$', '^'],
         \ ])
   inoremap <buffer><expr> <CR>
         \ ConditionalExpansionMap(
