@@ -6,6 +6,9 @@ set number
 set showmode                    " always show what mode we're currently editing in
 set expandtab                   " expand tabs by default (overloadable per file type later) (WARNING: this gets reset when :set paste is true!)
 set autoindent
+set tabstop=4                   " a tab is four spaces
+set softtabstop=4               " when hitting <BS>, pretend like a tab is removed, even if spaces
+set shiftwidth=4                " number of spaces to use for autoindenting
 set ignorecase
 set smartcase
 set clipboard=unnamed           " copy the default buffer to clipboard
