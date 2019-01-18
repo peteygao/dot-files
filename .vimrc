@@ -48,16 +48,16 @@ Plug 'ctrlpvim/ctrlp.vim'
 " Silver Searcher is strictly speaking not necessary, but without it
 " ctrlp-cmatcher won't be enabled (as per this .vimrc config file)
 Plug 'JazzCore/ctrlp-cmatcher', { 'do': './install.sh' }
-Plug 'tpope/vim-sleuth'
 " To use `elm-vim`, the following NPM packages must be installed:
 " `elm`, `elm-format`, `elm-oracle`, `elm-test`
 Plug 'ElmCast/elm-vim'
-Plug 'tpope/vim-abolish'
 Plug 'tomtom/tcomment_vim'
+Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-speeddating'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-sleuth'
 call plug#end()
 
 function! NumberToggle()
@@ -82,7 +82,7 @@ augroup END
 
 " Highlight lines that are too long, and trailing spaces
 hi LineOverflow  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
-autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:m2=matchadd('LineOverflow', '\%>80v.\+', -1) " Highlight lines longer than 80 chars
+autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:m2=matchadd('LineOverflow', '\%>100v.\+', -1) " Highlight lines longer than 100 chars
 autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:m2=matchadd('LineOverflow', '\s\+$', -1) " Highlight trailing spaces
 autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm autocmd WinEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:created=1
 autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:created=1
@@ -95,7 +95,7 @@ nnoremap gp `[v`]
 nnoremap <Leader>sc :tabe db/schema.rb<CR>
 nnoremap <Leader>sv :source ~/.vimrc<CR>
 nnoremap <Leader>ev :tabe ~/.vimrc<CR>
-nnoremap <C-S> :w<CR>
+" nnoremap <C-S> :w<CR> " Doesn't work right now... Investigate this later
 nnoremap <Leader>pi :PlugInstall<CR>
 nnoremap <Leader>pu :PlugUpdate<CR>
 
@@ -175,9 +175,9 @@ inoremap <s-tab> <c-n>
 
 " opens search results in a window w/ links and highlight the matches
 if exists(':Ag')
-  command! -nargs=+ Grep execute 'silent Ag! "<args>"' | copen 15 | redraw! | execute 'silent /<args>'
+  command! -nargs=+ Grep execute 'silent Ag!' . shellescape(<q-args>, 1) | copen 15 | redraw! | execute 'silent /' . <q-args>
 else
-  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=\*.min.js --exclude=tags --exclude-dir=coverage --exclude-dir=vendor --exclude-dir=node_modules --exclude-dir=*\dist\* --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* . -e ' . shellescape(<q-args>, 1) | copen 15 | redraw! | execute 'silent /' . <q-args>
+  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=\*.min.js --exclude=tags --exclude-dir=coverage --exclude-dir=vendor --exclude-dir=node_modules --exclude-dir=*\dist\* --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* --exclude-dir=*\web/libs\* . -e ' . shellescape(<q-args>, 1) | copen 15 | redraw! | execute 'silent /' . <q-args>
 endif
 " leader + D searches for the word under the cursor
 nmap <leader>d :Grep <c-r>=expand("<cword>")<cr><cr>
