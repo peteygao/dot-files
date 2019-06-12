@@ -82,7 +82,7 @@ augroup END
 
 " Highlight lines that are too long, and trailing spaces
 hi LineOverflow  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
-autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:m2=matchadd('LineOverflow', '\%>100v.\+', -1) " Highlight lines longer than 100 chars
+autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:m2=matchadd('LineOverflow', '\%>80v.\+', -1) " Highlight lines longer than 80 chars
 autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:m2=matchadd('LineOverflow', '\s\+$', -1) " Highlight trailing spaces
 autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm autocmd WinEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:created=1
 autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:created=1
