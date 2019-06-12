@@ -1,5 +1,6 @@
-alias l='ls -nFGh'
-alias la='ls -anFGh'
+alias l='ls -lFGh'
+alias la='ls -alFGh'
+alias ll='ls -alFh'
 alias displayoff='pmset displaysleepnow' # For OSX only
 alias bi='bundle install --jobs 4'
 
