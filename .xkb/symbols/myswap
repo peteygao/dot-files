@@ -1,0 +1,8 @@
+partial modifier_keys
+xkb_symbols "swap_l_alt_ctrl" {
+    key <LCTL>  { [ Alt_L ] };
+    key <LALT> { [ Control_L ] };
+    key <CAPS> { [ BackSpace ] };
+    key <LWIN> { [ Meta_L ] };
+    modifier_map Control { <LALT>, Control_L };
+};
