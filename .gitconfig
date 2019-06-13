@@ -1,14 +1,25 @@
 [alias]
-  ci = commit
-  st = status
-  br = branch
-  pr = pull --rebase
-  co = checkout
-  lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    ci = commit
+    st = status
+    br = branch
+    pr = pull --rebase
+    co = checkout
+    lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    d  = difftool --no-symlinks --dir-diff
 [core]
-  excludesfile = ~/.gitignore
+    excludesfile = ~/.gitignore
 [user]
-  email = me@petergao.com
-  name = peteygao
+    email = me@petergao.com
+    name = peteygao
 [push]
-  default = simple
+    default = simple
+[diff]
+    tool = kitty
+    guitool = kitty.gui
+[difftool]
+    prompt = false
+    trustExitCode = true
+[difftool "kitty"]
+    cmd = kitty +kitten diff $LOCAL $REMOTE
+[difftool "kitty.gui"]
+    cmd = kitty kitty +kitten diff $LOCAL $REMOTE
