@@ -3,6 +3,8 @@ alias la='ls -alFGh'
 alias ll='ls -alFh'
 alias displayoff='pmset displaysleepnow' # For OSX only
 alias bi='bundle install --jobs 4'
+alias clip='kitty +kitten clipboard'
+alias temps="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'"
 
 function rgrep {
   grep -Irn --color "$@" .
