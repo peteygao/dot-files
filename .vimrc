@@ -43,11 +43,9 @@ Plug 'w0rp/ale'
 Plug 'vim-airline/vim-airline'
 Plug 'simnalamburt/vim-mundo'
 Plug 'ctrlpvim/ctrlp.vim'
-" To install & compile ctrlp-cmatcher:
-" [sudo] apt-get install build-essentials python-dev silversearcher-ag
-" Silver Searcher is strictly speaking not necessary, but without it
-" ctrlp-cmatcher won't be enabled (as per this .vimrc config file)
-Plug 'JazzCore/ctrlp-cmatcher', { 'do': './install.sh' }
+" To install & compile cpsm:
+" apt-get install build-essentials python3-dev libboost-all-dev cmake libicu-dev
+Plug 'nixprime/cpsm', { 'do': './install.sh' }
 " To use `elm-vim`, the following NPM packages must be installed:
 " `elm`, `elm-format`, `elm-oracle`, `elm-test`
 Plug 'ElmCast/elm-vim'
@@ -58,6 +56,7 @@ Plug 'tpope/vim-surround'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-sleuth'
+Plug 'tomtom/tcomment_vim'
 call plug#end()
 
 function! NumberToggle()
@@ -132,15 +131,11 @@ nnoremap U :MundoToggle<CR>
 set undofile
 set undodir=~/.vim/undo
 
-" CtrlP + CtrlP-Cmatcher
+" CtrlP + cpsm matcher
 " Use the maintained version of CtrlP:
 " https://github.com/ctrlpvim/ctrlp.vim
-if executable('ag')
-  let g:ctrlp_lazy_update = 30
-  if !empty(glob("~/.vim/bundle/ctrlp-cmatcher/autoload/matcher.vim"))
-    let g:ctrlp_match_func = {'match' : 'matcher#cmatch' }
-  endif
-  let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+if !empty(glob("~/.vim/plugged/cpsm/bin/cpsm_py.so"))
+  let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
   noremap <leader>f :CtrlPClearCache<CR>:CtrlPRoot<CR>
 else
   let g:ctrlp_lazy_update = 75
