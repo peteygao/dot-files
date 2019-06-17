@@ -12,7 +12,7 @@
 if [ -n "$BASH_VERSION" ]; then
     # include .bashrc if it exists
     if [ -f "$HOME/.bashrc" ]; then
-	. "$HOME/.bashrc"
+        . "$HOME/.bashrc"
     fi
 fi
 
@@ -30,3 +30,4 @@ fi
 if [ -d "$HOME/.local/kitty.app/bin" ] ; then
     PATH="$HOME/.local/kitty.app/bin/:$PATH"
 fi
+eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
