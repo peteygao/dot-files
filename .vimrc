@@ -8,26 +8,28 @@ set number
 set showmode                    " always show what mode we're currently editing in
 set expandtab                   " expand tabs by default (overloadable per file type later) (WARNING: this gets reset when :set paste is true!)
 set autoindent
-set tabstop=4                   " a tab is four spaces
-set softtabstop=4               " when hitting <BS>, pretend like a tab is removed, even if spaces
-set shiftwidth=4                " number of spaces to use for autoindenting
+set tabstop=2                   " a tab is four spaces (DEFAULT, will get changed by vim-sleuth)
+set softtabstop=2               " when hitting <BS>, pretend like a tab is removed, even if spaces
+set shiftwidth=2                " number of spaces to use for autoindenting
 set ignorecase
 set smartcase
-set clipboard=unnamed           " copy the default buffer to clipboard
+set clipboard=unnamedplus       " copy the default buffer to clipboard
 set ttyfast
-set lazyredraw
-set re=1                        " Use version 1 of regexp engine (faster for Ruby syntax highlighting)
+set scrolloff=2                 " Start scrolling when the cursor is 2 lines away from the top/bottom of the screen
 syntax on
 filetype plugin indent on
 set hlsearch
 set incsearch
-set list
-set listchars=tab:▸·
+set list listchars=tab:»\ ,trail:·,nbsp:· " Tabs and trailing whitespace are visible
 highlight NonText guifg=#4a4a59
 highlight SpecialKey guifg=#4a4a59
 nnoremap <C-L> :nohl<CR>
 " Ctrl+C when in Input mode sends ESC
 inoremap <C-C> <ESC>
+
+""" Possibly obsolete performance optimizations:
+" set lazyredraw
+" set re=1                        " Use version 1 of regexp engine (faster for Ruby syntax highlighting)
 
 "***************************
 " vim-plug PLUGIN management
@@ -39,6 +41,7 @@ if empty(glob('~/.vim/autoload/plug.vim'))
 endif
 
 call plug#begin()
+" Don't forget to SOURCE .vimrc when you add a new plugin!!!
 Plug 'w0rp/ale'
 Plug 'vim-airline/vim-airline'
 Plug 'simnalamburt/vim-mundo'
@@ -56,7 +59,10 @@ Plug 'tpope/vim-surround'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-sleuth'
+Plug 'tpope/vim-dadbod'
 Plug 'tomtom/tcomment_vim'
+Plug 'junegunn/vim-easy-align'
+" Don't forget to SOURCE .vimrc when you add a new plugin!!!
 call plug#end()
 
 function! NumberToggle()
@@ -81,10 +87,16 @@ augroup END
 
 " Highlight lines that are too long, and trailing spaces
 hi LineOverflow  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
-autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:m2=matchadd('LineOverflow', '\%>80v.\+', -1) " Highlight lines longer than 80 chars
-autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:m2=matchadd('LineOverflow', '\s\+$', -1) " Highlight trailing spaces
-autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm autocmd WinEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:created=1
-autocmd BufEnter,VimEnter,FileType,VimEnter *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm let w:created=1
+hi TrailingSpaces  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
+augroup highlight
+  autocmd!
+  " Highlight lines longer than 80 chars
+  autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm
+      \ if !exists('w:m1') | let w:m1=matchadd('LineOverflow','\%>80v.\+', -1) | endif
+  " Highlight trailing spaces
+  autocmd BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.ex,*.exs,*.elm
+      \ if !exists('w:m2') | let w:m2=matchadd('TrailingSpaces','\s\+$', -1) | endif
+augroup END
 
 "********************
 " Custom keybindings
@@ -131,12 +143,17 @@ nnoremap U :MundoToggle<CR>
 set undofile
 set undodir=~/.vim/undo
 
+""" Clear CtrlP Cache after writing a new file
+autocmd BufWritePre * if !filereadable(expand('%')) | let b:is_new = 1 | endif
+autocmd BufWritePost * if get(b:, 'is_new', 0) | CtrlPClearCache | endif
+
 " CtrlP + cpsm matcher
 " Use the maintained version of CtrlP:
 " https://github.com/ctrlpvim/ctrlp.vim
 if !empty(glob("~/.vim/plugged/cpsm/bin/cpsm_py.so"))
   let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
-  noremap <leader>f :CtrlPClearCache<CR>:CtrlPRoot<CR>
+  noremap <leader>f :CtrlPRoot<CR>
+  noremap <leader><S-F> :CtrlPClearCache<CR>:CtrlPRoot<CR>
 else
   let g:ctrlp_lazy_update = 75
   set wildignore+=*/tmp/*,*/img/*,*/images/*,*/imgs/*,*.so,*.swp,*.zip,*/\.git/*,*/log/*,*/node_modules/*,\.bundle/*,deps/*
@@ -144,6 +161,14 @@ else
   noremap <leader>f :CtrlPRoot<CR>
   noremap <leader><S-F> :CtrlPClearCache<CR>:CtrlPRoot<CR>
 endif
+let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|git'
+
+" Vim Easy Align
+" Start interactive EasyAlign in visual mode (e.g. vipga)
+xmap ga <Plug>(EasyAlign)
+
+" Start interactive EasyAlign for a motion/text object (e.g. gaip)
+nmap ga <Plug>(EasyAlign)
 
 " Smart tab completion. Credit: Gary Bernhardt
 function! InsertTabWrapper()
@@ -267,6 +292,8 @@ function! ConditionalExpansionMap(trigger_char, mapping_list)
       let result = SpaceExpansion(mapping[0], mapping[1], mapping[2])
     elseif a:trigger_char == "\<CR>"
       let result = EnterExpansion(mapping[0], mapping[1], mapping[2])
+    elseif a:trigger_char == "\<BS>"
+      let result = BackspaceExpansion(mapping[0], mapping[1], mapping[2])
     else
       let result = CharExpansion(mapping[0], mapping[1], mapping[2])
     endif
@@ -314,6 +341,17 @@ function! EnterExpansion(check, output, line_pos)
   endif
 endf
 
+function! BackspaceExpansion(check, output, next_char_check)
+  let pos          = col('.')-2
+  let next_pos     = col('.')-1
+  let current_char = getline('.')[pos]
+  let next_char    = getline('.')[next_pos]
+
+  if a:check == current_char && a:next_char_check == next_char
+      return a:output
+  endif
+endf
+
 function! CharExpansion(check, output, line_pos)
   let start    = indent('.') + 1
   let col      = col('.')
@@ -330,6 +368,11 @@ function! CharExpansion(check, output, line_pos)
     return a:output
   endif
 endf
+
+""" Expansion augroup
+
+augroup expansions
+au!
 
 """ Generic Bracket-based language
 function! GenericAutoExpansion()
@@ -357,6 +400,16 @@ function! GenericAutoExpansion()
         \   ['[', '[]<LEFT>', '$'],
         \ ])
   inoremap <buffer><expr> ] strpart(getline('.'), col('.')-1, 1) == "]" ? "\<Right>" : "]"
+
+  " Backspace deletes matching pair
+  inoremap <buffer><expr> <BS>
+        \ ConditionalExpansionMap(
+        \ "\<BS>",
+        \ [
+        \   ['{', '<BS><DEL>', '}'],
+        \   ['(', '<BS><DEL>', ')'],
+        \   ['[', '<BS><DEL>', ']'],
+        \ ])
 endfunction
 au BufEnter,VimEnter,FileType *.rb,*.coffee,*.js,*.jsx,*.rst,*.c,*.cpp,*.ex,*.exs,*.elm call GenericAutoExpansion()
 
@@ -366,6 +419,7 @@ function! JSAutoExpansion()
         \ "\<SPACE>",
         \ [
         \   ['function', '  {<CR>}<Up><C-O>$<LEFT><LEFT>', '.'],
+        \   ['constructor', '  {<CR>}<Up><C-O>$<LEFT><LEFT>()<LEFT>', '.'],
         \   ['.constructor', ' = function  {<CR>}<Up><C-O>$<LEFT><LEFT>', '$'],
         \   ['=>', ' {<CR>}<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <LEFT><LEFT>', '$'],
         \ ])
@@ -373,7 +427,7 @@ function! JSAutoExpansion()
         \ ConditionalExpansionMap(
         \ "\<CR>",
         \ [
-        \   ['=>', ' {<CR>}<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <LEFT><LEFT>', '.'],
+        \   ['=>', ' {<CR>}<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <C-O>$<CR>', '.'],
         \ ])
 endfunction
 au BufEnter,VimEnter,FileType *.js,*.jsx call JSAutoExpansion()
@@ -431,3 +485,5 @@ function! ElixirAutoExpansion()
         \ ])
 endfunction
 au BufEnter,VimEnter,FileType *.ex,*.exs call ElixirAutoExpansion()
+
+augroup END
