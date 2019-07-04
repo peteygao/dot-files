@@ -145,7 +145,7 @@ set undodir=~/.vim/undo
 
 """ Clear CtrlP Cache after writing a new file
 autocmd BufWritePre * if !filereadable(expand('%')) | let b:is_new = 1 | endif
-autocmd BufWritePost * if get(b:, 'is_new', 0) | CtrlPClearCache | endif
+autocmd BufWritePost * if get(b:, 'is_new', 0) | let b:is_new = 0 | CtrlPClearCache | endif
 
 " CtrlP + cpsm matcher
 " Use the maintained version of CtrlP:
