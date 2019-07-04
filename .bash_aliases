@@ -5,6 +5,8 @@ alias displayoff='pmset displaysleepnow' # For OSX only
 alias bi='bundle install --jobs 4'
 alias clip='kitty +kitten clipboard'
 alias temps="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'"
+alias mongodb='docker run -d -p 27017:27017 -v ~/.mongodb/data:/data/db mongo'
+alias gdiff='kitty +kitten diff'
 
 function rgrep {
   grep -Irn --color "$@" .
