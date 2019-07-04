@@ -16,6 +16,7 @@ set smartcase
 set clipboard=unnamedplus       " copy the default buffer to clipboard
 set ttyfast
 set scrolloff=2                 " Start scrolling when the cursor is 2 lines away from the top/bottom of the screen
+set switchbuf+=usetab,newtab    " Open a file in existing tab if already open, otherwise new tab
 syntax on
 filetype plugin indent on
 set hlsearch
