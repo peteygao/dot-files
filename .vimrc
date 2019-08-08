@@ -48,6 +48,7 @@ call plug#begin()
 " Don't forget to SOURCE .vimrc when you add a new plugin!!!
 Plug 'w0rp/ale'
 Plug 'vim-airline/vim-airline'
+Plug 'airblade/vim-gitgutter'
 Plug 'simnalamburt/vim-mundo'
 Plug 'ctrlpvim/ctrlp.vim'
 " To install & compile cpsm:
@@ -66,6 +67,8 @@ Plug 'tpope/vim-sleuth'
 Plug 'tpope/vim-dadbod'
 Plug 'tomtom/tcomment_vim'
 Plug 'junegunn/vim-easy-align'
+Plug 'vim-scripts/Tabmerge'
+Plug 'sheerun/vim-polyglot'
 " Don't forget to SOURCE .vimrc when you add a new plugin!!!
 call plug#end()
 
