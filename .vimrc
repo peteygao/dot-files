@@ -196,9 +196,9 @@ inoremap <s-tab> <c-n>
 
 " opens search results in a window w/ links and highlight the matches
 if exists(':Ag')
-  command! -nargs=+ Grep execute 'silent Ag!' . shellescape(<q-args>, 1) | copen 15 | redraw! | execute 'silent /' . <q-args>
+  command! -nargs=+ Grep execute 'silent Ag!' . shellescape(<q-args>, 1) | copen 15 | redraw! | execute 'silent /' . substitute(<q-args>, "\/", "\\\\/", "g")
 else
-  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log} --exclude=\*.min.js --exclude=tags --exclude-dir=coverage --exclude-dir=vendor --exclude-dir=node_modules --exclude-dir=*\dist\* --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* --exclude-dir=*\web/libs\* . -e ' . shellescape(<q-args>, 1) | copen 15 | redraw! | execute 'silent /' . <q-args>
+  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log,lock} --exclude=\*.min.js --exclude=tags --exclude-dir=coverage --exclude-dir=vendor --exclude-dir=node_modules --exclude-dir=*\dist\* --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* --exclude-dir=*\web/libs\* . -e ' . shellescape(<q-args>, 1) | copen 15 | redraw! | execute 'silent /' . substitute(<q-args>, "\/", "\\\\/", "g")
 endif
 " leader + D searches for the word under the cursor
 nmap <leader>d :Grep <c-r>=expand("<cword>")<cr><cr>
