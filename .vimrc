@@ -1,4 +1,7 @@
-set t_Co=16
+" Allow color schemes to do bright colors without forcing bold.
+if &t_Co == 8 && $TERM !~# '^linux\|^Eterm'
+  set t_Co=16
+endif
 
 let mapleader=" "
 
@@ -28,7 +31,7 @@ nnoremap <C-L> :nohl<CR>
 " Ctrl+C when in Input mode sends ESC
 inoremap <C-C> <ESC>
 
-""" Possibly obsolete performance optimizations:
+""" Possibly obsolete performance optimizations when used with kitty terminal:
 " set lazyredraw
 " set re=1                        " Use version 1 of regexp engine (faster for Ruby syntax highlighting)
 
@@ -99,6 +102,12 @@ augroup highlight
       \ if !exists('w:m2') | let w:m2=matchadd('TrailingSpaces','\s\+$', -1) | endif
 augroup END
 
+" Delete closed/hidden Fugitive buffers in the background
+augroup fugitive
+  autocmd!
+  autocmd BufReadPost fugitive://* set bufhidden=delete
+augroup END
+
 "********************
 " Custom keybindings
 "********************
@@ -114,6 +123,9 @@ nnoremap <Leader>pu :PlugUpdate<CR>
 " Remaps Git Gutter hunk movement from ]h, [h to gh, gH
 nmap gh <Plug>GitGutterNextHunk
 nmap gH <Plug>GitGutterPrevHunk
+
+" Speed up the diff marker update interval
+set updatetime=100
 
 " Vim-Airline
 set laststatus=2
@@ -278,8 +290,10 @@ function! ConfigurePluginAfterLoad()
     map <leader>a :call RunTestFile('', 'async')<cr>
   endif
 endfunction
-
-au VimEnter * call ConfigurePluginAfterLoad()
+augroup configurePluginAfterLoad
+  au!
+  au VimEnter * call ConfigurePluginAfterLoad()
+augroup END
 
 """""" Language specific auto-expansion
 " Pass in a list of mappings of expansions
@@ -370,8 +384,7 @@ function! CharExpansion(check, output, line_pos)
   endif
 endf
 
-""" Expansion augroup
-
+""" Auto-Expansion augroups
 augroup expansions
 au!
 
