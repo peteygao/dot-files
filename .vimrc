@@ -436,9 +436,9 @@ function! JSAutoExpansion()
         \ "\<SPACE>",
         \ [
         \   ['function', '  {<CR>}<Up><C-O>$<LEFT><LEFT>', '.'],
-        \   ['constructor', '  {<CR>}<Up><C-O>$<LEFT><LEFT>()<LEFT>', '.'],
         \   ['.constructor', ' = function  {<CR>}<Up><C-O>$<LEFT><LEFT>', '$'],
         \   ['=>', ' {<CR>}<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <LEFT><LEFT>', '$'],
+        \   ['edc', '<BS><BS><BS>export default class  extends React.Component {<CR>}<UP><C-O>4f ', '$'],
         \ ])
   inoremap <buffer><expr> <CR>
         \ ConditionalExpansionMap(
