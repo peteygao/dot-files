@@ -1,3 +1,6 @@
+# Disable pausing terminal stream on Ctrl-S (Ctrl-Q to resume)
+stty -ixon
+
 export LANG=C.UTF-8
 export TERM=xterm-256color
 

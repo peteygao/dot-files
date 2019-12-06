@@ -56,6 +56,7 @@ Plug 'ctrlpvim/ctrlp.vim'
 Plug 'nixprime/cpsm', { 'do': './install.sh' }
 " To use `elm-vim`, the following NPM packages must be installed:
 " `elm`, `elm-format`, `elm-oracle`, `elm-test`
+Plug 'tpope/vim-rhubarb'
 Plug 'ElmCast/elm-vim'
 Plug 'tomtom/tcomment_vim'
 Plug 'tpope/vim-abolish'
@@ -69,8 +70,20 @@ Plug 'tomtom/tcomment_vim'
 Plug 'junegunn/vim-easy-align'
 Plug 'vim-scripts/Tabmerge'
 Plug 'sheerun/vim-polyglot'
+Plug 'leafgarland/typescript-vim'
 " Don't forget to SOURCE .vimrc when you add a new plugin!!!
 call plug#end()
+
+"""
+" ALE Fixer configs
+"""
+let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\   'typescript': ['eslint', 'tslint', 'prettier'],
+\   'javascript': ['eslint', 'prettier'],
+\}
+let g:ale_fix_on_save = 1
+"let g:ale_cursor_detail = 1
 
 function! NumberToggle()
   if(&relativenumber == 1 && &number == 1)
@@ -106,10 +119,10 @@ augroup highlight
 augroup END
 
 " Delete closed/hidden Fugitive buffers in the background
-augroup fugitive
-  autocmd!
-  autocmd BufReadPost fugitive://* set bufhidden=delete
-augroup END
+"augroup fugitive
+"  autocmd!
+"  autocmd BufReadPost fugitive://* set bufhidden=delete
+"augroup END
 
 "********************
 " Custom keybindings
@@ -124,27 +137,46 @@ nnoremap <Leader>pi :PlugInstall<CR>
 nnoremap <Leader>pu :PlugUpdate<CR>
 
 " Remaps Git Gutter hunk movement from ]h, [h to gh, gH
-nmap gh <Plug>GitGutterNextHunk
-nmap gH <Plug>GitGutterPrevHunk
+nmap gh <Plug>(GitGutterNextHunk)
+nmap gH <Plug>(GitGutterPrevHunk)
+nnoremap <Leader>a :ALEDetail<CR>
+
+" Split lines (opposite of J to join lines)
+nnoremap S :keeppatterns substitute/\s*\%#\s*/\r/e <bar> normal! ==<CR>
+
+"*******************
+" End of Custom keybindings
+"*******************
+
 
 " Speed up the diff marker update interval
 set updatetime=100
 
 " Vim-Airline
 set laststatus=2
+let g:airline_section_a = ''
+let g:airline_section_b = ''
+let g:airline_section_x = ''
+let g:airline_section_y = ''
 let g:airline_mode_map = {
-    \ '__' : '-',
-    \ 'n'  : 'N',
-    \ 'i'  : 'I',
-    \ 'R'  : 'R',
-    \ 'c'  : 'C',
-    \ 'v'  : 'V',
-    \ 'V'  : 'V',
-    \ '' : 'V',
-    \ 's'  : 'S',
-    \ 'S'  : 'S',
-    \ '' : 'S',
-    \ 't'  : 'T',
+    \ '__'     : '-',
+    \ 'c'      : 'C',
+    \ 'i'      : 'I',
+    \ 'ic'     : 'I',
+    \ 'ix'     : 'I',
+    \ 'n'      : 'N',
+    \ 'multi'  : 'M',
+    \ 'ni'     : 'N',
+    \ 'no'     : 'N',
+    \ 'R'      : 'R',
+    \ 'Rv'     : 'R',
+    \ 's'      : 'S',
+    \ 'S'      : 'S',
+    \ ''     : 'S',
+    \ 't'      : 'T',
+    \ 'v'      : 'V',
+    \ 'V'      : 'V',
+    \ ''     : 'V',
     \ }
 let g:airline#extensions#ale#enabled = 1
 
@@ -177,7 +209,7 @@ else
   noremap <leader>f :CtrlPRoot<CR>
   noremap <leader><S-F> :CtrlPClearCache<CR>:CtrlPRoot<CR>
 endif
-let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|git'
+let g:ctrlp_custom_ignore = 'node_modules\|DS_Store\|git\|dist'
 
 " Vim Easy Align
 " Start interactive EasyAlign in visual mode (e.g. vipga)
@@ -213,10 +245,23 @@ inoremap <s-tab> <c-n>
 if exists(':Ag')
   command! -nargs=+ Grep execute 'silent Ag!' . shellescape(<q-args>, 1) | copen 15 | redraw! | execute 'silent /' . substitute(<q-args>, "\/", "\\\\/", "g")
 else
-  command! -nargs=+ Grep execute 'silent grep! -Ir --exclude=\*.{json,pyc,tmp,log,lock} --exclude=\*.min.js --exclude=tags --exclude-dir=coverage --exclude-dir=vendor --exclude-dir=node_modules --exclude-dir=*\dist\* --exclude-dir=*\tmp\* --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\* --exclude-dir=*\deps\* --exclude-dir=*\web/libs\* . -e ' . shellescape(<q-args>, 1) | copen 15 | redraw! | execute 'silent /' . substitute(<q-args>, "\/", "\\\\/", "g")
+  command! -nargs=+ Grep execute 'silent grep! -Ir
+        \ --exclude=\*.{json,pyc,tmp,log,lock} --exclude=\*.min.js --exclude=tags
+        \ --exclude-dir=coverage --exclude-dir=vendor --exclude-dir=node_modules
+        \ --exclude-dir=packs --exclude-dir=*\dist\* --exclude-dir=*\tmp\*
+        \ --exclude-dir=*\.git\* --exclude-dir=*\.idea\* --exclude-dir=*\*cache\*
+        \ --exclude-dir=public --exclude-dir=*\build\*
+        \ --exclude-dir=*\deps\* --exclude-dir=*\web/libs\* . -e '
+        \ . shellescape(<q-args>, 1) | copen 15 | redraw! | execute 'silent /' . substitute(<q-args>, "\/", "\\\\/", "g")
 endif
 " leader + D searches for the word under the cursor
 nmap <leader>d :Grep <c-r>=expand("<cword>")<cr><cr>
+" leader + D triggers a tsserver reference find for TypeScript
+augroup TypeScriptFind
+  autocmd!
+  au BufEnter,VimEnter,FileType typescript* nmap <leader>d :ALEFindReferences<cr>
+  au BufEnter,VimEnter,FileType typescript* nmap <leader>t :ALEGoToDefinitionInTab<cr>
+augroup END
 
 " Test helpers from Gary Bernhardt's screen cast:
 " https://www.destroyallsoftware.com/screencasts/catalog/file-navigation-in-vim
@@ -437,17 +482,21 @@ function! JSAutoExpansion()
         \ [
         \   ['function', '  {<CR>}<Up><C-O>$<LEFT><LEFT>', '.'],
         \   ['.constructor', ' = function  {<CR>}<Up><C-O>$<LEFT><LEFT>', '$'],
-        \   ['=>', ' {<CR>}<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <LEFT><LEFT>', '$'],
+        \   ['() =>', ' {<CR>})<UP><C-O>f)', '$'],
+        \   ['()=>', ' {<CR>})<UP><C-O>f)<RIGHT> <C-O>T(', '$'],
+        \   ['==>', '<LEFT><LEFT><SPACE><RIGHT><RIGHT> {<CR>}<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <LEFT><LEFT>', '$'],
+        \   ['=>', ' {<CR>})<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <LEFT><LEFT>', '$'],
         \   ['edc', '<BS><BS><BS>export default class  extends React.Component {<CR>}<UP><C-O>4f ', '$'],
         \ ])
   inoremap <buffer><expr> <CR>
         \ ConditionalExpansionMap(
         \ "\<CR>",
         \ [
-        \   ['=>', ' {<CR>}<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <C-O>$<CR>', '.'],
+        \   ['==>', '<LEFT><LEFT><SPACE><RIGHT><RIGHT> {<CR>}<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <C-O>$<CR>', '.'],
+        \   ['=>', ' {<CR>})<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <C-O>$<CR>', '.'],
         \ ])
 endfunction
-au BufEnter,VimEnter,FileType *.js,*.jsx call JSAutoExpansion()
+au BufEnter,VimEnter,FileType *.js,*.jsx,*.ts,*.tsx call JSAutoExpansion()
 
 function! RubyAutoExpansion()
   inoremap <buffer><expr> <SPACE>
@@ -479,8 +528,8 @@ function! RubySpecAutoExpansion()
         \   ['def', '<CR>end<UP><C-O>$<SPACE>', '^'],
         \   ['do', '<CR>end<UP><C-O>$<SPACE>', '$'],
         \
-        \   ['context', " '' do<CR>end<UP><C-O>f'<RIGHT>", '^'],
-        \   ['describe', " '' do<CR>end<UP><C-O>f'<RIGHT>", '^'],
+        \   ['context', ' "" do<CR>end<UP><C-O>f"<RIGHT>', '^'],
+        \   ['describe', ' "" do<CR>end<UP><C-O>f"<RIGHT>', '^'],
         \   ['it', " '' do<CR>end<UP><C-O>f'", '^'],
         \ ])
 endfunction
@@ -491,7 +540,7 @@ function! ElixirAutoExpansion()
         \ ConditionalExpansionMap(
         \ "\<SPACE>",
         \ [
-        \   ['defmodule', '<CR>end<UP><C-O>$<SPACE>', '^'],
+        \   ['defmodule', ' do<CR>end<UP><C-O>$<LEFT><LEFT><LEFT><SPACE>', '^'],
         \   ['do', '<CR>end<UP><C-O>$<SPACE>', '$'],
         \ ])
   inoremap <buffer><expr> <CR>
@@ -503,4 +552,6 @@ function! ElixirAutoExpansion()
 endfunction
 au BufEnter,VimEnter,FileType *.ex,*.exs call ElixirAutoExpansion()
 
+autocmd BufEnter * :syntax sync fromstart
+autocmd VimLeave * call system("xsel -ib", getreg('+')) " Don't clear clipboard on vim exit
 augroup END

@@ -1,12 +1,17 @@
+# Terminal navigation aliases
 alias l='ls -lFGh'
 alias la='ls -alFGh'
 alias ll='ls -alFh'
-alias displayoff='pmset displaysleepnow' # For OSX only
+
+# Handy aliases
 alias bi='bundle install --jobs 4'
 alias clip='kitty +kitten clipboard'
-alias temps="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'"
-alias mongodb='docker run -d -p 27017:27017 -v ~/.mongodb/data:/data/db mongo'
+alias compact-memory='echo 1 | sudo tee -a /proc/sys/vm/compact_memory > /dev/null'
+alias cpu='cat /proc/cpuinfo | grep "cpu MHz"'
+alias displayoff='pmset displaysleepnow' # For OSX only
 alias gdiff='kitty +kitten diff'
+alias mongodb='docker run -d -p 27017:27017 -v ~/.mongodb/data:/data/db mongo'
+alias temps="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'"
 
 function rgrep {
   grep -Irn --color "$@" .

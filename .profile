@@ -8,14 +8,6 @@
 # for ssh logins, install and configure the libpam-umask package.
 #umask 022
 
-# if running bash
-if [ -n "$BASH_VERSION" ]; then
-    # include .bashrc if it exists
-    if [ -f "$HOME/.bashrc" ]; then
-        . "$HOME/.bashrc"
-    fi
-fi
-
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/bin" ] ; then
     PATH="$HOME/bin:$PATH"
@@ -30,4 +22,13 @@ fi
 if [ -d "$HOME/.local/kitty.app/bin" ] ; then
     PATH="$HOME/.local/kitty.app/bin/:$PATH"
 fi
-eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+
+# AWS Elastic Beanstalk CLI paths
+export PATH="$HOME/.ebcli-virtual-env/executables:$PATH"
+
+# React Native requires Android Studio & SDK paths
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/tools
+export PATH=$PATH:$ANDROID_HOME/tools/bin
+export PATH=$PATH:$ANDROID_HOME/platform-tools
