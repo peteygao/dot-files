@@ -71,6 +71,7 @@ Plug 'junegunn/vim-easy-align'
 Plug 'vim-scripts/Tabmerge'
 Plug 'sheerun/vim-polyglot'
 Plug 'leafgarland/typescript-vim'
+Plug 'rking/ag.vim'
 " Don't forget to SOURCE .vimrc when you add a new plugin!!!
 call plug#end()
 
@@ -92,18 +93,18 @@ function! NumberToggle()
   elseif(&number == 1)
     set nonumber
   else
-    set relativenumber
+    "set relativenumber
     set number
   endif
 endfunc
 
 nnoremap <C-N> :call NumberToggle()<cr>
 
-augroup numbertoggle
-  autocmd!
-  autocmd BufEnter,FocusGained,InsertLeave,WinEnter * if &nu | set rnu   | endif
-  autocmd BufLeave,FocusLost,InsertEnter,WinLeave   * if &nu | set nornu | endif
-augroup END
+" augroup numbertoggle
+"   autocmd!
+"   autocmd BufEnter,FocusGained,InsertLeave,WinEnter * if &nu | set rnu   | endif
+"   autocmd BufLeave,FocusLost,InsertEnter,WinLeave   * if &nu | set nornu | endif
+" augroup END
 
 " Highlight lines that are too long, and trailing spaces
 hi LineOverflow  ctermfg=white ctermbg=red guifg=white guibg=#FF2270
@@ -482,8 +483,9 @@ function! JSAutoExpansion()
         \ [
         \   ['function', '  {<CR>}<Up><C-O>$<LEFT><LEFT>', '.'],
         \   ['.constructor', ' = function  {<CR>}<Up><C-O>$<LEFT><LEFT>', '$'],
-        \   ['() =>', ' {<CR>})<UP><C-O>f)', '$'],
-        \   ['()=>', ' {<CR>})<UP><C-O>f)<RIGHT> <C-O>T(', '$'],
+        \   ['> =>', ' {<CR><CR>}<UP><TAB>', '$'],
+        \   [') =>', ' {<CR><CR>})<UP><TAB>', '$'],
+        \   [')=>', ' {<CR>})<UP><C-O>f)<RIGHT> <C-O>$<CR>', '$'],
         \   ['==>', '<LEFT><LEFT><SPACE><RIGHT><RIGHT> {<CR>}<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <LEFT><LEFT>', '$'],
         \   ['=>', ' {<CR>})<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <LEFT><LEFT>', '$'],
         \   ['edc', '<BS><BS><BS>export default class  extends React.Component {<CR>}<UP><C-O>4f ', '$'],
@@ -492,6 +494,7 @@ function! JSAutoExpansion()
         \ ConditionalExpansionMap(
         \ "\<CR>",
         \ [
+        \   ['> =>', ' {<CR><CR>}<UP><TAB>', '$'],
         \   ['==>', '<LEFT><LEFT><SPACE><RIGHT><RIGHT> {<CR>}<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <C-O>$<CR>', '.'],
         \   ['=>', ' {<CR>})<UP><C-O>$<LEFT><LEFT><LEFT><LEFT>() <C-O>$<CR>', '.'],
         \ ])
@@ -530,7 +533,7 @@ function! RubySpecAutoExpansion()
         \
         \   ['context', ' "" do<CR>end<UP><C-O>f"<RIGHT>', '^'],
         \   ['describe', ' "" do<CR>end<UP><C-O>f"<RIGHT>', '^'],
-        \   ['it', " '' do<CR>end<UP><C-O>f'", '^'],
+        \   ['it', " \"\" do<CR>end<UP><C-O>f\"", '^'],
         \ ])
 endfunction
 au BufEnter,VimEnter,FileType *_spec.rb call RubySpecAutoExpansion()
