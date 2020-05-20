@@ -128,7 +128,3 @@ fi
 . $HOME/.asdf/completions/asdf.bash
 
 . $HOME/.git-completion.sh
-
-. $HOME/.asdf/asdf.sh
-
-. $HOME/.asdf/completions/asdf.bash
